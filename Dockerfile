@@ -1,31 +1,18 @@
-# Build da aplicação
-FROM eclipse-temurin:21-jdk AS build
+# Etapa de build
+FROM maven:3.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
-# Copia arquivos do Gradle primeiro para aproveitar cache
-COPY gradlew .
-COPY gradle gradle
-COPY build.gradle.kts .
-COPY settings.gradle.kts .
+COPY src
 
-RUN chmod +x gradlew
+RUN mvn clean package -DskipTests
 
-# Baixa dependências
-RUN ./gradlew dependencies --no-daemon || true
-
-# Copia o restante do projeto
-COPY .
-
-# Gera o JAR
-RUN ./gradlew bootJar --no-daemon
-
-# Imagem final
+# Etapa de execução
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=build /app/target/*.jar app.jar
 
 EXPOSE 8080
 
