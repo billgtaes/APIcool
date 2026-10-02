@@ -1,5 +1,5 @@
 # Build da aplicação
-FROM eclipse-temurin:21-jdk AS build
+FROM eclipse-temurin:17-jdk AS build
 
 WORKDIR /app
 
