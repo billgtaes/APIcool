@@ -1,19 +1,23 @@
-# Etapa de build
-FROM maven:3.9-eclipse-temurin-21 AS build
+FROM eclipse-temurin:21-jdk AS build
 
 WORKDIR /app
 
-COPY src
+COPY gradlew .
+COPY gradle ./gradle
+COPY build.gradle.kts .
+COPY settings.gradle.kts .
 
-RUN mvn clean package -DskipTests
+COPY src ./src
 
-# Etapa de execução
+RUN chmod +x gradlew
+
+RUN ./gradlew clean bootJar --no-daemon
+
+
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app
 
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/build/libs/*.jar app.jar
 
-EXPOSE 8080
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+CMD ["java", "-jar", "app.jar"]
